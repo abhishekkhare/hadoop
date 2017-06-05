@@ -19,10 +19,14 @@ import com.edu.abhi.hadoop.util.FileUtils;
  */
 public class RecordCountDefault extends Configured implements Tool {
 	
-	public int run(String[] arg0) throws Exception {
+	public int run(String[] args) throws Exception {
 		FileUtils.deleteDirectory(new File("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/RC"));
+		if(args!=null && args[1]!=null)
+			FileUtils.deleteDirectoryOnHDFS(args[1]);
 		
 		Job job = Job.getInstance(getConf());
+		job.setJarByClass(getClass());
+		
 		/**
 		 * Below are the default configurations.
 		 * The default mapper is Mapper.class, the default reducer is Reducer.class, 
@@ -35,8 +39,20 @@ public class RecordCountDefault extends Configured implements Tool {
 		//job.setOutputFormatClass(TextOutputFormat.class);
 		
 		//FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Downloads/largedeck.txt"));
-		FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/deckofcards.txt"));
-		FileOutputFormat.setOutputPath(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/RC"));
+		if(args!=null && args[0]!=null){
+			FileInputFormat.setInputPaths(job, new Path(args[0]));	
+		}else{
+			FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/deckofcards.txt"));
+		}
+		if(args!=null && args[1]!=null){
+			FileOutputFormat.setOutputPath(job, new Path(args[1]));
+			
+		}else{
+			FileUtils.deleteDirectory(new File("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output"));
+			FileOutputFormat.setOutputPath(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/RC"));	
+		}
+		
+		
 		return job.waitForCompletion(true)?0:1;
 	}
 

@@ -9,7 +9,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
@@ -36,7 +35,11 @@ private static class CardCountBySuitMapper extends Mapper<LongWritable, Text, Te
 	
 	public int run(String[] args) throws Exception {
 		FileUtils.deleteDirectory(new File("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output"));
+		if(args!=null && args[1]!=null)
+			FileUtils.deleteDirectoryOnHDFS(args[1]);
+		
 		Job job = Job.getInstance(getConf());
+		job.setJarByClass(getClass());
 		//Mapper Configuration
 		job.setMapperClass(CardCountBySuitMapper.class);
 		job.setMapOutputKeyClass(Text.class);
@@ -50,10 +53,21 @@ private static class CardCountBySuitMapper extends Mapper<LongWritable, Text, Te
 		job.setOutputValueClass(LongWritable.class);
 		
 		job.setNumReduceTasks(2);
-
 		
-		FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/deckofcards.txt"));
-		FileOutputFormat.setOutputPath(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/cardCountBySuit"));
+		if(args!=null && args[0]!=null){
+			FileInputFormat.setInputPaths(job, new Path(args[0]));	
+		}else{
+			FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/deckofcards.txt"));
+		}
+		if(args!=null && args[1]!=null){
+			FileOutputFormat.setOutputPath(job, new Path(args[1]));
+			FileUtils.deleteDirectory(new File(args[1]));
+		}else{
+			FileUtils.deleteDirectory(new File("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output"));
+			FileOutputFormat.setOutputPath(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/cardCountBySuit"));	
+		}
+		
+		
 		
 		return job.waitForCompletion(true) ? 0 : 1;
 	}

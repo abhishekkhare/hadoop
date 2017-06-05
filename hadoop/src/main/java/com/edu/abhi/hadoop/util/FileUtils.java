@@ -1,6 +1,10 @@
 package com.edu.abhi.hadoop.util;
 
 import java.io.File;
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.*;
 /**
  * 
  * @author abhishekkhare
@@ -21,5 +25,19 @@ public class FileUtils {
 		// either file or an empty directory
 		System.out.println("removing file or directory : " + dir.getName());
 		return dir.delete();
+	}
+	
+	public static boolean deleteDirectoryOnHDFS(String path) throws IOException{
+		Configuration conf = new Configuration();
+
+		Path output = new Path("/the/folder/to/delete");
+		FileSystem hdfs = FileSystem.get(conf);
+
+		// delete existing directory
+		if (hdfs.exists(output)) {
+		    return hdfs.delete(output, true);
+		}
+		
+		return false;
 	}
 }

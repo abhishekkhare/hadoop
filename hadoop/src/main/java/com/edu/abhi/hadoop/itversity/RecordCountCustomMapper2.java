@@ -32,10 +32,14 @@ public class RecordCountCustomMapper2 extends Configured implements Tool {
 		}
 	}
 	
-	public int run(String[] arg0) throws Exception {
+	public int run(String[] args) throws Exception {
 		FileUtils.deleteDirectory(new File("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output"));
+		if(args!=null && args[1]!=null)
+			FileUtils.deleteDirectoryOnHDFS(args[1]);
 		
 		Job job = Job.getInstance(getConf());
+		job.setJarByClass(getClass());
+		
 		//Mapper Configuration
 		job.setMapperClass(RecordMapper.class);
 		job.setMapOutputKeyClass(Text.class);
@@ -48,8 +52,19 @@ public class RecordCountCustomMapper2 extends Configured implements Tool {
 		
 		job.setNumReduceTasks(1);		
 		//FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/deckofcards.txt"));
-		FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/nyse_2009.csv"));
-		FileOutputFormat.setOutputPath(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/recordCountWithMapper"));
+		
+		if(args!=null && args[0]!=null){
+			FileInputFormat.setInputPaths(job, new Path(args[0]));	
+		}else{
+			FileInputFormat.setInputPaths(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/data/nyse_2009.csv"));
+		}
+		if(args!=null && args[1]!=null){
+			FileOutputFormat.setOutputPath(job, new Path(args[1]));
+			
+		}else{
+			FileUtils.deleteDirectory(new File("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output"));
+			FileOutputFormat.setOutputPath(job, new Path("/Users/abhishekkhare/Google Drive/Ebooks/learnworkspace/hadoop/hadoop/output/recordCountWithMapper"));	
+		}
 		return job.waitForCompletion(true)?0:1;
 	}
 
